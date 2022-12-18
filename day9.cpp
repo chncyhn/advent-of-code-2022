@@ -61,19 +61,27 @@ Coord pull(Coord& head, Coord& tail) {
   return {tail.first + ox, tail.second + oy};
 }
 
-int main() {
-  auto moves = readInput();
-
+int solve(std::vector<Move>& moves, int tailCnt) {
   std::set<Coord> visited;
   visited.emplace(0, 0);
   Coord h{0, 0};
-  Coord t{0, 0};
+  std::vector<Coord> tails(tailCnt);
   for (auto& [dir, times] : moves) {
     for (auto i = 0; i < times; i++) {
       h = applyMove(h, dir);
-      t = pull(h, t);
-      visited.emplace(t.first, t.second);
+      for (auto t = 0; t < tailCnt; t++) {
+        Coord& follows = t == 0 ? h : tails[t - 1];
+        tails[t] = pull(follows, tails[t]);
+      }
+      Coord& tail = tails[tailCnt - 1];
+      visited.emplace(tail.first, tail.second);
     }
   }
-  std::cout << visited.size() << std::endl;
+  return visited.size();
+}
+
+int main() {
+  auto moves = readInput();
+  std::cout << "Part 1: " << solve(moves, 1) << std::endl;
+  std::cout << "Part 2: " << solve(moves, 9) << std::endl;
 }
